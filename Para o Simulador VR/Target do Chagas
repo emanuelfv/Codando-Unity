@@ -1,0 +1,46 @@
+using Photon.Pun;
+using UnityEngine;
+
+public class Target : MonoBehaviour
+{
+    [SerializeField] GameObject cone, cube;
+    [SerializeField] RaycastHit target;
+    [SerializeField] RoboController rb;
+
+    public bool inTarget;
+    public bool inIntake;
+
+    // Update is called once per frame
+    void Update()
+    {
+        AimTarget();
+    }
+    void AimTarget()
+    {
+        inTarget = Physics.Raycast(transform.position, transform.right, out target, 0.5f);
+        Debug.DrawLine(transform.position, target.point, Color.red);
+        if (inIntake && inTarget)
+        {           
+            if (Intake.objGame.tag == "Cube" && target.transform.gameObject.tag == "TargetCube")
+            {
+                cube.SetActive(true);
+                cube.transform.position = target.transform.position;
+                Intake.objGame.GetComponent<Point>().target = target.transform;
+                print("cube");
+            }
+            if(Intake.objGame.tag == "Cone" && target.transform.gameObject.tag == "TargetCone")
+            {
+                cone.SetActive(true);
+                cone.transform.position = target.transform.position;
+                Intake.objGame.GetComponent<Point>().target = target.transform;
+                print("cone");
+            }
+
+        }
+        else
+        {
+            cone.SetActive(false);
+            cube.SetActive(false);
+        }
+    }
+}
