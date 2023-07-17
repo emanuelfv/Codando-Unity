@@ -1,0 +1,117 @@
+using Photon.Pun;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.XR;
+
+public class Intake : MonoBehaviour
+{
+    [SerializeField] Transform conePoint;
+    [SerializeField] RaycastHit obj;
+    [SerializeField] Target target;
+    [SerializeField] PhotonView pv;
+    public static GameObject objGame;
+    public bool pickObj1;
+    public bool pickObj2;
+    public bool getObj;
+    public bool setObj;
+    public string objName;
+    public RoboController rb;
+    public Point pt;
+    void Update()
+    {
+        if (rb.jogador == 0)
+        {
+            Capter(pickObj1);
+            PickUp(pickObj1);
+        }
+       else if (rb.jogador == 1 || rb.jogador == 2)
+        {
+            Capter(pickObj2);
+            PickUp(pickObj2);
+        }
+    }
+    void Capter(bool pickObj)
+    {
+        getObj = Physics.Raycast(conePoint.position, conePoint.right, out obj, 0.2f);
+
+        if (!pickObj && getObj && (obj.transform.gameObject.tag == "Cone" || obj.transform.gameObject.tag == "Cube"))
+        {
+            Debug.DrawLine(conePoint.position, obj.point, Color.red);
+            objGame = obj.transform.gameObject;
+            pt = objGame.GetComponent<Point>();
+            objGame.GetComponent<MeshRenderer>().material.color = new Color(1, 0.6471f, 0f);
+            objName = obj.transform.gameObject.tag;
+        }
+        else if (objGame != null && !pickObj && objName == "Cone")
+        {
+            objGame.GetComponent<MeshRenderer>().material.color = new Color(1, 0.8392157f, 0.02352941f);
+            objGame = null;
+        }
+        else if (objGame != null && !pickObj && objName == "Cube")
+        {
+            objGame.GetComponent<MeshRenderer>().material.color = new Color(0.7490196f, 0, 0.7490196f);
+            objGame = null;
+        }
+    }
+    void PickUp(bool pickObj)
+    {
+        if (rb.jogador == 0)
+        {
+            if ((Input.GetKeyDown(KeyCode.U) || Input.GetKey(KeyCode.Joystick1Button3)) && objGame != null)
+            {
+                pickObj1 = true;
+                target.inIntake = true;
+            }
+            else if ((Input.GetKeyDown(KeyCode.J) || Input.GetKey(KeyCode.Joystick1Button1) && pickObj == true))
+            {
+                pt.shoot = true;
+                pickObj1 = false;
+                target.inIntake = false;
+                objGame = null;
+                pt = null;
+            }
+        }
+
+        else if (rb.jogador == 1 || rb.jogador == 2)
+        {
+            if ((Input.GetKeyDown(KeyCode.U) || Input.GetKey(KeyCode.Joystick2Button3)) && objGame != null)
+            {
+                pickObj2 = true;
+                target.inIntake = true;
+            }
+            else if ((Input.GetKeyDown(KeyCode.J) || Input.GetKey(KeyCode.Joystick2Button1)) && pickObj == true)
+            {
+                pt.shoot = true;
+                pickObj2 = false;
+                target.inIntake = false;
+                objGame = null;
+                pt = null;
+            }
+        }
+
+        if (pickObj && objGame != null)
+        {
+            objGame.transform.position = new Vector3(transform.position.x, transform.position.y - 0.1f, transform.position.z);
+            objGame.transform.rotation = Quaternion.Euler(transform.rotation.x - 90, transform.rotation.y, transform.rotation.z);
+
+            pt.shoot = false;
+            //objGame.GetComponent<PhotonView>().RequestOwnership();
+            /*Vector3 p = new Vector3(transform.position.x, transform.position.y - 0.1f, transform.position.z);
+            Quaternion q = Quaternion.Euler(transform.rotation.x - 90, transform.rotation.y, transform.rotation.z);
+            objGame.GetComponent<AttPosition>().UpdateObjectPosition(p, q);*/
+
+
+            if (objName == "Cone")
+            {
+                objGame.GetComponent<MeshRenderer>().material.color = new Color(1, 0.8392157f, 0.02352941f);
+
+            }
+            if (objName == "Cube")
+            {
+                objGame.GetComponent<MeshRenderer>().material.color = new Color(0.7490196f, 0, 0.7490196f);
+            }
+        }
+    }
+
+}
